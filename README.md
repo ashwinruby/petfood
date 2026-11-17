@@ -25,7 +25,7 @@ npx playwright test
 SITE_URL=https://13.207.211.164 npx playwright test
 ```
 
-Tests cover product filtering, basket totals, persistence and removal, keyboard dismissal, JavaScript errors, image loading and viewport overflow at desktop/mobile widths.
+Tests cover product filtering, basket totals, persistence and removal, keyboard dismissal, JavaScript errors, image loading and viewport overflow at ten widths from 320px to 1920px. Navigation checks verify the sticky header, visible mobile links, unobscured section anchors, return-to-top link and basket access at mobile, tablet and desktop widths.
 
 ## Deployment
 
