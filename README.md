@@ -52,3 +52,11 @@ sudo journalctl -u petfood-certbot.service
 ## Assets
 
 Dog photo downloaded from [Unsplash](https://images.unsplash.com/photo-1552053831-71594a27632d) via `https://images.unsplash.com/photo-1552053831-71594a27632d`; stored locally in `public/dog.jpg`. Typography uses DM Sans and Manrope via Google Fonts, with system fallbacks. Product packaging and illustrations are original HTML/CSS/SVG, not images of actual products.
+
+## Checkout preview (issue #4)
+
+A separately started local API now supports persisted **demo orders** and gated Stripe test checkout. Live sales remain disabled. See [checkout setup and limitations](docs/checkout.md). Run `npm run start:api` alongside `npm run dev`, then choose “Try demo checkout” in the basket. Use fictional data only. Existing static deployments need explicit API infrastructure before checkout can work.
+
+## Test order history and administration (issue #5)
+
+`/orders.html` provides browser-session-private test order history; `/admin.html` requires a server-configured administrator secret and supports fulfillment/tracking updates. Read [order setup, security boundaries and verification](docs/orders.md). No live orders or customer-account/recovery system are enabled.
