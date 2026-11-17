@@ -15,3 +15,7 @@ This extends the existing Vite/native-JavaScript storefront with JSON and browse
 - Verified catalogue data and licensed real product photography supplied by the business.
 - A selected inventory system and server-side stock reservation/reconciliation.
 - Removal or approval of the original site's marketing claims as part of launch content review.
+
+## Product detail pages
+
+Every product name links to `/?product=<product-id>`. URLs are handled by the existing static entry point, so no server rewrite is required. Pack selection uses the same variant IDs as the basket and checkout contract. Unknown product IDs show a recovery link. Ingredients, nutrition and feeding guidance appear only for verified products; sample records explicitly say the information is pending. Reviews currently show an honest empty state: review collection/moderation must be connected to real customer feedback before populated reviews are launched.
