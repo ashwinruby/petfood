@@ -1,0 +1,82 @@
+{
+  "products": [
+    {
+      "id": "chicken",
+      "pet": "dog",
+      "name": "The Everyday Favorite",
+      "flavor": "Farm-raised chicken & brown rice",
+      "price": 899,
+      "weight": "1 kg",
+      "color": "peach",
+      "label": "CHICKEN",
+      "tag": "THE CROWD FAVORITE",
+      "shape": "dog",
+      "verified": false,
+      "description": "Illustrative recipe for the GoodBowl concept store. Not available for real purchase.",
+      "ingredients": null,
+      "nutrition": null,
+      "feedingGuidance": null,
+      "image": null,
+      "variants": [
+        {
+          "id": "chicken",
+          "weight": "1 kg",
+          "price": 899,
+          "stock": 12
+        }
+      ]
+    },
+    {
+      "id": "salmon",
+      "pet": "dog",
+      "name": "The Happy & Healthy",
+      "flavor": "Salmon & sweet potato",
+      "price": 1099,
+      "weight": "1 kg",
+      "color": "sage",
+      "label": "SALMON",
+      "tag": "A LITTLE EXTRA GOODNESS",
+      "shape": "dog",
+      "verified": false,
+      "description": "Illustrative recipe for the GoodBowl concept store. Not available for real purchase.",
+      "ingredients": null,
+      "nutrition": null,
+      "feedingGuidance": null,
+      "image": null,
+      "variants": [
+        {
+          "id": "salmon",
+          "weight": "1 kg",
+          "price": 1099,
+          "stock": 12
+        }
+      ]
+    },
+    {
+      "id": "tuna",
+      "pet": "cat",
+      "name": "The Purrfect Bowl",
+      "flavor": "Ocean tuna & pumpkin",
+      "price": 799,
+      "weight": "500 g",
+      "color": "lavender",
+      "label": "TUNA",
+      "tag": "FOR YOUR LITTLE ROYAL",
+      "shape": "cat",
+      "verified": false,
+      "description": "Illustrative recipe for the GoodBowl concept store. Not available for real purchase.",
+      "ingredients": null,
+      "nutrition": null,
+      "feedingGuidance": null,
+      "image": null,
+      "variants": [
+        {
+          "id": "tuna",
+          "weight": "500 g",
+          "price": 799,
+          "stock": 12
+        }
+      ]
+    }
+  ]
+}
