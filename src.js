@@ -1,4 +1,10 @@
 import './style.css';
+// Account for the wrapped mobile navigation and text resizing when following anchors.
+const header = document.querySelector('.site-header');
+const updateHeaderHeight = () => document.documentElement.style.setProperty('--header-height', `${header.getBoundingClientRect().height}px`);
+updateHeaderHeight();
+new ResizeObserver(updateHeaderHeight).observe(header);
+
 const products = [
  {id:'chicken',pet:'dog',name:'The Everyday Favorite',flavor:'Farm-raised chicken & brown rice',price:899,weight:'1 kg',color:'peach',label:'CHICKEN',tag:'THE CROWD FAVORITE',shape:'dog'},
  {id:'salmon',pet:'dog',name:'The Happy & Healthy',flavor:'Salmon & sweet potato',price:1099,weight:'1 kg',color:'sage',label:'SALMON',tag:'A LITTLE EXTRA GOODNESS',shape:'dog'},
