@@ -60,3 +60,7 @@ A separately started local API now supports persisted **demo orders** and gated 
 ## Test order history and administration (issue #5)
 
 `/orders.html` provides browser-session-private test order history; `/admin.html` requires a server-configured administrator secret and supports fulfillment/tracking updates. Read [order setup, security boundaries and verification](docs/orders.md). No live orders or customer-account/recovery system are enabled.
+
+## Combined demo deployment
+
+The deployed demo now includes a persistent API behind HTTPS. See [deployment operations](docs/deployment.md) for service, administrator access, storage and rollback. `deploy/update.sh` remains frontend-only; use the documented full-release procedure for API changes.

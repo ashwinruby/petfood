@@ -1,0 +1,22 @@
+[Unit]
+Description=GoodBowl demo checkout and orders API
+After=network.target
+
+[Service]
+Type=simple
+User=petfood
+Group=petfood
+WorkingDirectory=/opt/petfood/current
+EnvironmentFile=/etc/petfood/api.env
+ExecStart=/opt/petfood-node/bin/node server/start.js
+Restart=on-failure
+RestartSec=3
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/petfood
+
+[Install]
+WantedBy=multi-user.target
