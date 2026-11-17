@@ -38,7 +38,7 @@ export function createApp(options = {}) {
   app.decorate('db', db);
   app.decorate('paymentMode', mode);
   app.addHook('onClose', async () => db.close());
-  app.setErrorHandler((error, request, reply) => reply.code(error.statusCode >= 400 && error.statusCode < 500 ? error.statusCode : 500).send({ error: error.statusCode < 500 ? error.message : 'The request could not be completed. Please try again.' }));
+  app.setErrorHandler((error, request, reply) => reply.code(error.statusCode >= 400 && error.statusCode < 600 ? error.statusCode : 500).send({ error: error.statusCode < 500 ? error.message : 'The request could not be completed. Please try again.' }));
   // Cookie-only browser authentication, no CORS; require exact origin for mutations.
   app.addHook('onRequest', async (request, reply) => {
     reply.header('Cache-Control', 'no-store').header('X-Content-Type-Options', 'nosniff');
