@@ -1,6 +1,9 @@
 import './checkout.css';
 const cart = document.querySelector('#cart');
 if (cart) {
+  const history = document.createElement('a');
+  history.href = '/orders.html'; history.textContent = 'Your test orders'; history.dataset.orderHistory = ''; history.className = 'order-status-link';
+  cart.append(history);
   const start = document.createElement('button');
   start.type = 'button'; start.className = 'button checkout-start'; start.textContent = 'Try demo checkout';
   cart.insertBefore(start, document.querySelector('#continue-shopping'));
