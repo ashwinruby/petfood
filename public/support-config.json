@@ -1,0 +1,9 @@
+{
+  "business": { "name": "GoodBowl", "email": "", "phone": "", "address": "", "hours": "" },
+  "policies": {
+    "shipping": { "approved": false, "updated": "", "text": "" },
+    "returns": { "approved": false, "updated": "", "text": "" },
+    "privacy": { "approved": false, "updated": "", "text": "" },
+    "terms": { "approved": false, "updated": "", "text": "" }
+  }
+}
