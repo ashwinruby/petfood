@@ -2,6 +2,7 @@ import './style.css';
 import './catalogue.css';
 import { loadCatalogue, sanitizeBasket, escapeHTML as html, money } from './catalogue.js';
 import { productArt } from './product-art.js';
+import { showProductDetails } from './product-details.js';
 const header = document.querySelector('.site-header');
 const updateHeaderHeight = () => document.documentElement.style.setProperty('--header-height', `${header.getBoundingClientRect().height}px`);
 updateHeaderHeight();
@@ -14,7 +15,7 @@ function renderProducts() {
   const v = p.variants.find(v => v.stock > 0) || p.variants[0];
   const safe = Object.fromEntries(Object.entries(p).map(([key,value]) => [key, typeof value === 'string' ? html(value) : value]));
   safe.color = ['peach','sage','lavender'].includes(p.color) ? p.color : 'peach';
-  return `<article class="product">${p.image ? `<div class="product-art"><img class="catalogue-photo" src="${html(p.image)}" alt="${html(p.name)} packaging" loading="lazy"></div>` : productArt(safe)}<div class="product-info"><span class="pet-label">FOR ${p.pet.toUpperCase()}S <span>· ${html(v.weight)}</span></span><h3>${html(p.name)}</h3><p>${html(p.flavor)}</p><p class="stock-status">${v.stock ? `${v.stock} available${p.verified ? '' : ' (demo stock)'}` : 'Out of stock'}</p><div class="product-bottom"><strong>${money(v.price)}</strong><button data-add="${v.id}" aria-label="Add ${html(p.name)} to basket" ${v.stock ? '' : 'disabled'}>Add to bag <span>+</span></button></div></div></article>`;
+  return `<article class="product">${p.image ? `<div class="product-art"><img class="catalogue-photo" src="${html(p.image)}" alt="${html(p.name)} packaging" loading="lazy"></div>` : productArt(safe)}<div class="product-info"><span class="pet-label">FOR ${p.pet.toUpperCase()}S <span>· ${html(v.weight)}</span></span><h3><a href="/?product=${p.id}">${html(p.name)}</a></h3><p>${html(p.flavor)}</p><p class="stock-status">${v.stock ? `${v.stock} available${p.verified ? '' : ' (demo stock)'}` : 'Out of stock'}</p><div class="product-bottom"><strong>${money(v.price)}</strong><button data-add="${v.id}" aria-label="Add ${html(p.name)} to basket" ${v.stock ? '' : 'disabled'}>Add to bag <span>+</span></button></div></div></article>`;
  }).join('') || '<p>No products in this category yet.</p>';
 }
 function updateCart() {
@@ -62,6 +63,7 @@ async function initialize() {
   products = await loadCatalogue();
   try { basket = sanitizeBasket(JSON.parse(localStorage.getItem('goodbowl-basket') || '{}'), products); } catch {}
   renderProducts(); updateCart();
+  showProductDetails(products, addToBasket);
   document.querySelector('.sample-note').textContent = products.some(p => !p.verified) ? 'Concept catalogue: sample products, prices and stock. No real purchases. Product information is awaiting verification.' : 'Browse our products. Availability is confirmed at checkout.';
  } catch {
   grid.innerHTML = '<p role="alert">The catalogue could not be loaded. Please refresh to try again.</p>';
