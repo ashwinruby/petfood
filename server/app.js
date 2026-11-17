@@ -1,4 +1,6 @@
 import Fastify from 'fastify';
+import rateLimit from '@fastify/rate-limit';
+import { registerOrders } from './orders.js';
 import Stripe from 'stripe';
 import { DatabaseSync } from 'node:sqlite';
 import { randomBytes, randomUUID, createHash } from 'node:crypto';
@@ -35,10 +37,11 @@ export function createApp(options = {}) {
     CREATE TABLE IF NOT EXISTS payment_events (id TEXT PRIMARY KEY);
   `);
   const app = Fastify({ logger: false, bodyLimit: 16384 });
+  app.register(rateLimit, { global: true, max: 120, timeWindow: '1 minute' });
   app.decorate('db', db);
   app.decorate('paymentMode', mode);
   app.addHook('onClose', async () => db.close());
-  app.setErrorHandler((error, request, reply) => reply.code(error.statusCode >= 400 && error.statusCode < 500 ? error.statusCode : 500).send({ error: error.statusCode < 500 ? error.message : 'The request could not be completed. Please try again.' }));
+  app.setErrorHandler((error, request, reply) => reply.code(error.statusCode >= 400 && error.statusCode < 600 ? error.statusCode : 500).send({ error: error.statusCode < 500 ? error.message : 'The request could not be completed. Please try again.' }));
   // Cookie-only browser authentication, no CORS; require exact origin for mutations.
   app.addHook('onRequest', async (request, reply) => {
     reply.header('Cache-Control', 'no-store').header('X-Content-Type-Options', 'nosniff');
@@ -178,5 +181,6 @@ export function createApp(options = {}) {
       return { received: true };
     });
   });
+  app.register(async scope => registerOrders(scope, { ...options, origin }));
   return app;
 }

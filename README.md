@@ -56,3 +56,7 @@ Dog photo downloaded from [Unsplash](https://images.unsplash.com/photo-155205383
 ## Checkout preview (issue #4)
 
 A separately started local API now supports persisted **demo orders** and gated Stripe test checkout. Live sales remain disabled. See [checkout setup and limitations](docs/checkout.md). Run `npm run start:api` alongside `npm run dev`, then choose “Try demo checkout” in the basket. Use fictional data only. Existing static deployments need explicit API infrastructure before checkout can work.
+
+## Test order history and administration (issue #5)
+
+`/orders.html` provides browser-session-private test order history; `/admin.html` requires a server-configured administrator secret and supports fulfillment/tracking updates. Read [order setup, security boundaries and verification](docs/orders.md). No live orders or customer-account/recovery system are enabled.
