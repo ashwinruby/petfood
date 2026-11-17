@@ -1,21 +1,70 @@
 import './style.css';
-// Account for the wrapped mobile navigation and text resizing when following anchors.
+import './catalogue.css';
+import { loadCatalogue, sanitizeBasket, escapeHTML as html, money } from './catalogue.js';
+import { productArt } from './product-art.js';
 const header = document.querySelector('.site-header');
 const updateHeaderHeight = () => document.documentElement.style.setProperty('--header-height', `${header.getBoundingClientRect().height}px`);
 updateHeaderHeight();
 new ResizeObserver(updateHeaderHeight).observe(header);
-
-const products = [
- {id:'chicken',pet:'dog',name:'The Everyday Favorite',flavor:'Farm-raised chicken & brown rice',price:899,weight:'1 kg',color:'peach',label:'CHICKEN',tag:'THE CROWD FAVORITE',shape:'dog'},
- {id:'salmon',pet:'dog',name:'The Happy & Healthy',flavor:'Salmon & sweet potato',price:1099,weight:'1 kg',color:'sage',label:'SALMON',tag:'A LITTLE EXTRA GOODNESS',shape:'dog'},
- {id:'tuna',pet:'cat',name:'The Purrfect Bowl',flavor:'Ocean tuna & pumpkin',price:799,weight:'500 g',color:'lavender',label:'TUNA',tag:'FOR YOUR LITTLE ROYAL',shape:'cat'}
-];
-let basket = {};
-try { const stored=JSON.parse(localStorage.getItem('goodbowl-basket') || '{}'); for (const p of products) if (Number.isInteger(stored?.[p.id]) && stored[p.id]>0 && stored[p.id]<=99) basket[p.id]=stored[p.id]; } catch {}
-const money = n => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
-const face = pet => pet === 'cat' ? '<path d="M26 48 20 19 43 30Q60 24 77 30L100 19 94 48Q108 94 60 99 12 94 26 48Z"/><path d="m49 70 11 8 11-8M60 78v9M22 74l-15-4m16 13L7 87m90-13 16-4M97 83l16 4"/><circle cx="42" cy="58" r="3"/><circle cx="78" cy="58" r="3"/>' : '<path d="M35 34Q60 19 85 34L96 78Q87 103 60 104 33 103 24 78Z"/><path d="M35 34Q5 25 10 67q6 19 20 2M85 34q30-9 25 33-6 19-20 2M49 77q11 14 22 0M60 73v10"/><circle cx="44" cy="58" r="3"/><circle cx="76" cy="58" r="3"/><path d="m53 70 7 5 7-5Z"/>';
-function renderProducts(filter='all') { document.querySelector('#products').innerHTML=products.filter(p=>filter==='all'||p.pet===filter).map(p=>`<article class="product"><div class="product-art ${p.color}"><span class="product-tag">${p.tag}</span><div class="food-bag"><div class="bag-seam"></div><div class="bag-brand">goodbowl.</div><span class="bag-sub">GOOD FOOD. HAPPY TAILS.</span><svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">${face(p.pet)}</svg><div class="bag-label">${p.label}<small>REAL FOOD FOR ${p.pet.toUpperCase()}S</small></div><span class="bag-weight">NATURALLY DELICIOUS · ${p.weight}</span></div><span class="art-caption">A bowl full of good.</span></div><div class="product-info"><span class="pet-label">FOR ${p.pet.toUpperCase()}S <span>· ${p.weight}</span></span><h3>${p.name}</h3><p>${p.flavor}</p><div class="product-bottom"><strong>${money(p.price)}</strong><button data-add="${p.id}" aria-label="Add ${p.name} to basket">Add to bag <span>+</span></button></div></div></article>`).join(''); }
-function updateCart(){let count=0,total=0;document.querySelector('#cart-items').innerHTML=products.filter(p=>basket[p.id]).map(p=>{count+=basket[p.id];total+=p.price*basket[p.id];return `<div class="cart-row"><div><strong>${p.name}</strong><p>${basket[p.id]} × ${money(p.price)}</p></div><button data-remove="${p.id}" aria-label="Remove one ${p.name}">−</button></div>`}).join('')||'<p class="empty-cart">A happy bowl starts here.<br>Explore the menu and add a favorite.</p>';document.querySelector('#cart-count').textContent=count;document.querySelector('#cart-total').textContent=money(total);try{localStorage.setItem('goodbowl-basket',JSON.stringify(basket));}catch{}}
-let timer;document.querySelector('#products').addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(!b)return;basket[b.dataset.add]=Math.min(99,(basket[b.dataset.add]||0)+1);updateCart();const toast=document.querySelector('#toast');toast.textContent='A little goodness added to your bag ✓';toast.classList.add('show');clearTimeout(timer);timer=setTimeout(()=>toast.classList.remove('show'),2600)});
-document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-filter]').forEach(t=>{t.classList.toggle('active',t===b);t.setAttribute('aria-pressed',String(t===b))});renderProducts(b.dataset.filter)}));
-const cart=document.querySelector('#cart');document.querySelector('#open-cart').onclick=()=>cart.showModal();document.querySelector('#close-cart').onclick=()=>cart.close();document.querySelector('#continue-shopping').onclick=()=>cart.close();cart.addEventListener('click',e=>{const b=e.target.closest('[data-remove]');if(b){if(--basket[b.dataset.remove]<=0)delete basket[b.dataset.remove];updateCart();}if(e.target===cart){const r=cart.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)cart.close()}});document.querySelector('#year').textContent=new Date().getFullYear();renderProducts();updateCart();
+let products = [], basket = {}, currentFilter = 'all';
+const cart = document.querySelector('#cart');
+const grid = document.querySelector('#products');
+function renderProducts() {
+ grid.innerHTML = products.filter(p => currentFilter === 'all' || p.pet === currentFilter).map(p => {
+  const v = p.variants.find(v => v.stock > 0) || p.variants[0];
+  const safe = Object.fromEntries(Object.entries(p).map(([key,value]) => [key, typeof value === 'string' ? html(value) : value]));
+  safe.color = ['peach','sage','lavender'].includes(p.color) ? p.color : 'peach';
+  return `<article class="product">${p.image ? `<div class="product-art"><img class="catalogue-photo" src="${html(p.image)}" alt="${html(p.name)} packaging" loading="lazy"></div>` : productArt(safe)}<div class="product-info"><span class="pet-label">FOR ${p.pet.toUpperCase()}S <span>· ${html(v.weight)}</span></span><h3>${html(p.name)}</h3><p>${html(p.flavor)}</p><p class="stock-status">${v.stock ? `${v.stock} available${p.verified ? '' : ' (demo stock)'}` : 'Out of stock'}</p><div class="product-bottom"><strong>${money(v.price)}</strong><button data-add="${v.id}" aria-label="Add ${html(p.name)} to basket" ${v.stock ? '' : 'disabled'}>Add to bag <span>+</span></button></div></div></article>`;
+ }).join('') || '<p>No products in this category yet.</p>';
+}
+function updateCart() {
+ basket = sanitizeBasket(basket, products);
+ let count = 0, total = 0;
+ const rows = [];
+ for (const p of products) for (const v of p.variants) if (basket[v.id]) {
+  count += basket[v.id]; total += v.price * basket[v.id];
+  rows.push(`<div class="cart-row"><div><strong>${html(p.name)}</strong><p>${html(v.weight)} · ${basket[v.id]} × ${money(v.price)}</p></div><button data-remove="${v.id}" aria-label="Remove one ${html(p.name)}">−</button></div>`);
+ }
+ document.querySelector('#cart-items').innerHTML = rows.join('') || '<p class="empty-cart">A happy bowl starts here.<br>Explore the menu and add a favorite.</p>';
+ document.querySelector('#cart-count').textContent = count;
+ document.querySelector('#cart-total').textContent = money(total);
+ try { localStorage.setItem('goodbowl-basket', JSON.stringify(basket)); } catch {}
+ document.dispatchEvent(new CustomEvent('goodbowl:basket-updated', {detail: {basket: {...basket}}}));
+}
+let timer;
+function addToBasket(id) {
+ const variant = products.flatMap(p => p.variants).find(v => v.id === id);
+ if (!variant || !variant.stock) return;
+ const old = basket[id] || 0;
+ basket[id] = Math.min(old + 1, variant.stock, 99);
+ updateCart();
+ const toast = document.querySelector('#toast');
+ toast.textContent = basket[id] > old ? 'A little goodness added to your bag ✓' : 'Maximum available quantity is already in your bag.';
+ toast.classList.add('show'); clearTimeout(timer); timer = setTimeout(() => toast.classList.remove('show'), 2600);
+}
+grid.addEventListener('click', event => { const button = event.target.closest('[data-add]'); if (button) addToBasket(button.dataset.add); });
+document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => {
+ document.querySelectorAll('[data-filter]').forEach(other => { other.classList.toggle('active', other === button); other.setAttribute('aria-pressed', String(other === button)); });
+ currentFilter = button.dataset.filter; renderProducts();
+}));
+document.querySelector('#open-cart').onclick = () => cart.showModal();
+document.querySelector('#close-cart').onclick = () => cart.close();
+document.querySelector('#continue-shopping').onclick = () => cart.close();
+cart.addEventListener('click', event => {
+ const button = event.target.closest('[data-remove]');
+ if (button) { if (--basket[button.dataset.remove] <= 0) delete basket[button.dataset.remove]; updateCart(); }
+ if (event.target === cart) { const r = cart.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) cart.close(); }
+});
+document.querySelector('#year').textContent = new Date().getFullYear();
+async function initialize() {
+ grid.setAttribute('aria-busy', 'true');
+ try {
+  products = await loadCatalogue();
+  try { basket = sanitizeBasket(JSON.parse(localStorage.getItem('goodbowl-basket') || '{}'), products); } catch {}
+  renderProducts(); updateCart();
+  document.querySelector('.sample-note').textContent = products.some(p => !p.verified) ? 'Concept catalogue: sample products, prices and stock. No real purchases. Product information is awaiting verification.' : 'Browse our products. Availability is confirmed at checkout.';
+ } catch {
+  grid.innerHTML = '<p role="alert">The catalogue could not be loaded. Please refresh to try again.</p>';
+ } finally { grid.removeAttribute('aria-busy'); }
+}
+initialize();
